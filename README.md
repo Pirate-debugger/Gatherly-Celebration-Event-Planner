@@ -27,16 +27,6 @@ Rather than functioning as a generic chatbot, Gatherly provides an end-to-end ev
 
 ---
 
-## 🏆 Evaluation Scorecard Alignment (Target 100/100)
-
-| Evaluation Area | Implemented Controls & Evidence | Score Target |
-| :--- | :--- | :---: |
-| **1. Code Quality** | Strict TypeScript, zero `any` shortcuts, modular domain decoupling (`/types`, `/lib/calculations`, `/lib/security`, `/components`), pure calculation functions, zero dead code or placeholder buttons. | **100 / 100** |
-| **2. Security** | Server-side API key isolation, Zod input and output schema validation, sliding-window rate limiter (10 req/min), 32 KB payload size limit, prompt injection defense, OWASP security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options). | **100 / 100** |
-| **3. Efficiency** | Static prerendering in Next.js 16 with Partial Prefetching, integer minor-unit math ($O(n)$ operations), zero memory leaks in rate limiter, bounded response payloads, client-side offline fallback without extra network hops. | **100 / 100** |
-| **4. Testing** | Comprehensive Vitest suite with **42 passing automated tests** spanning minor-unit math, float precision immunity, boundary validations, rate limiter isolation, schema sanitization, and React Testing Library component tests. | **100 / 100** |
-| **5. Accessibility** | WCAG 2.2 AA compliant contrast, semantic HTML5, visible `:focus-visible` rings, reduced-motion media query support (`@media (prefers-reduced-motion)`), accessible dialog with keyboard Escape and focus management. | **100 / 100** |
-| **6. Problem Statement** | Comprehensive coverage of all challenge event types (weddings, birthdays, anniversaries, community, corporate, graduation) with executive summaries, reconciled budgets, dynamic timelines, vendor checklists, and risk plans. | **100 / 100** |
 
 ---
 
