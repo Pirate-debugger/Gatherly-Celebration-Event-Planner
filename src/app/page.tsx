@@ -333,11 +333,20 @@ export default function HomePage(): React.JSX.Element {
           {/* Interactive Event Dashboard */}
           <div className="space-y-6">
             {/* Tab Navigation Navigation Bar */}
-            <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 border-b border-slate-800 text-xs font-semibold">
+            <div
+              role="tablist"
+              aria-label="Celebration Planning Sections"
+              className="flex items-center space-x-1.5 overflow-x-auto pb-1 border-b border-slate-800 text-xs font-semibold"
+            >
               <button
                 type="button"
+                role="tab"
+                id="tab-overview"
+                aria-selected={activeTab === "overview"}
+                aria-controls="tabpanel-overview"
+                tabIndex={activeTab === "overview" ? 0 : -1}
                 onClick={() => setActiveTab("overview")}
-                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap ${
+                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:outline-none ${
                   activeTab === "overview"
                     ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
@@ -349,8 +358,13 @@ export default function HomePage(): React.JSX.Element {
 
               <button
                 type="button"
+                role="tab"
+                id="tab-budget"
+                aria-selected={activeTab === "budget"}
+                aria-controls="tabpanel-budget"
+                tabIndex={activeTab === "budget" ? 0 : -1}
                 onClick={() => setActiveTab("budget")}
-                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap ${
+                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:outline-none ${
                   activeTab === "budget"
                     ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
@@ -365,8 +379,13 @@ export default function HomePage(): React.JSX.Element {
 
               <button
                 type="button"
+                role="tab"
+                id="tab-timeline"
+                aria-selected={activeTab === "timeline"}
+                aria-controls="tabpanel-timeline"
+                tabIndex={activeTab === "timeline" ? 0 : -1}
                 onClick={() => setActiveTab("timeline")}
-                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap ${
+                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:outline-none ${
                   activeTab === "timeline"
                     ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
@@ -383,8 +402,13 @@ export default function HomePage(): React.JSX.Element {
 
               <button
                 type="button"
+                role="tab"
+                id="tab-itinerary"
+                aria-selected={activeTab === "itinerary"}
+                aria-controls="tabpanel-itinerary"
+                tabIndex={activeTab === "itinerary" ? 0 : -1}
                 onClick={() => setActiveTab("itinerary")}
-                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap ${
+                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:outline-none ${
                   activeTab === "itinerary"
                     ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
@@ -396,8 +420,13 @@ export default function HomePage(): React.JSX.Element {
 
               <button
                 type="button"
+                role="tab"
+                id="tab-vendors"
+                aria-selected={activeTab === "vendors"}
+                aria-controls="tabpanel-vendors"
+                tabIndex={activeTab === "vendors" ? 0 : -1}
                 onClick={() => setActiveTab("vendors")}
-                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap ${
+                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:outline-none ${
                   activeTab === "vendors"
                     ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
@@ -409,8 +438,13 @@ export default function HomePage(): React.JSX.Element {
 
               <button
                 type="button"
+                role="tab"
+                id="tab-ideas"
+                aria-selected={activeTab === "ideas"}
+                aria-controls="tabpanel-ideas"
+                tabIndex={activeTab === "ideas" ? 0 : -1}
                 onClick={() => setActiveTab("ideas")}
-                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap ${
+                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:outline-none ${
                   activeTab === "ideas"
                     ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
@@ -422,8 +456,13 @@ export default function HomePage(): React.JSX.Element {
 
               <button
                 type="button"
+                role="tab"
+                id="tab-risks"
+                aria-selected={activeTab === "risks"}
+                aria-controls="tabpanel-risks"
+                tabIndex={activeTab === "risks" ? 0 : -1}
                 onClick={() => setActiveTab("risks")}
-                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap ${
+                className={`flex items-center space-x-2 rounded-lg px-3.5 py-2.5 transition whitespace-nowrap focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:outline-none ${
                   activeTab === "risks"
                     ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
                     : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200"
@@ -435,7 +474,13 @@ export default function HomePage(): React.JSX.Element {
             </div>
 
             {/* Active Tab Panel */}
-            <div className="pt-2">
+            <div
+              role="tabpanel"
+              id={`tabpanel-${activeTab}`}
+              aria-labelledby={`tab-${activeTab}`}
+              tabIndex={0}
+              className="pt-2 focus:outline-none"
+            >
               {activeTab === "overview" && (
                 <ExecutiveOverviewCard plan={activePlan} />
               )}

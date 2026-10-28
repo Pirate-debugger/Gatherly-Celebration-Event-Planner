@@ -283,7 +283,14 @@ export function EventWizardModal({
             <span className={step >= 4 ? "text-violet-400 font-semibold" : ""}>4. Notes</span>
             <span className={step >= 5 ? "text-violet-400 font-semibold" : ""}>5. Review</span>
           </div>
-          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+          <div
+            role="progressbar"
+            aria-valuenow={step}
+            aria-valuemin={1}
+            aria-valuemax={5}
+            aria-label="Wizard step progress"
+            className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden"
+          >
             <div
               className="h-full bg-gradient-to-r from-violet-600 to-indigo-500 transition-all duration-300"
               style={{ width: `${(step / 5) * 100}%` }}
@@ -321,11 +328,13 @@ export function EventWizardModal({
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
                   Event Type *
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" role="radiogroup" aria-label="Event Type">
                   {EVENT_TYPE_OPTIONS.map((opt) => (
                     <button
                       key={opt.type}
                       type="button"
+                      role="radio"
+                      aria-checked={eventType === opt.type}
                       onClick={() => setEventType(opt.type)}
                       className={`flex items-center space-x-2 rounded-lg border p-2.5 text-left text-xs font-medium transition ${
                         eventType === opt.type
@@ -465,11 +474,13 @@ export function EventWizardModal({
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Venue Environment
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-3" role="radiogroup" aria-label="Venue Environment">
                   {(["indoor", "outdoor", "hybrid"] as VenueType[]).map((vt) => (
                     <button
                       key={vt}
                       type="button"
+                      role="radio"
+                      aria-checked={venueType === vt}
                       onClick={() => setVenueType(vt)}
                       className={`rounded-lg border p-2.5 text-center text-xs font-medium capitalize transition ${
                         venueType === vt
@@ -522,13 +533,15 @@ export function EventWizardModal({
                   <Utensils className="h-3.5 w-3.5 mr-1 text-emerald-400" />
                   <span>Dietary Requirements & Accommodations</span>
                 </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5" role="group" aria-label="Dietary Accommodations">
                   {COMMON_DIETARY.map((item) => {
                     const isSelected = selectedDietary.includes(item);
                     return (
                       <button
                         key={item}
                         type="button"
+                        aria-pressed={isSelected}
+                        aria-label={`Dietary restriction: ${item}`}
                         onClick={() => toggleItem(selectedDietary, setSelectedDietary, item)}
                         className={`rounded-full px-2.5 py-1 text-xs font-medium border transition ${
                           isSelected
@@ -549,13 +562,15 @@ export function EventWizardModal({
                   <Accessibility className="h-3.5 w-3.5 mr-1 text-indigo-400" />
                   <span>Accessibility & Inclusion Needs</span>
                 </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5" role="group" aria-label="Accessibility Accommodations">
                   {COMMON_ACCESSIBILITY.map((item) => {
                     const isSelected = selectedAccessibility.includes(item);
                     return (
                       <button
                         key={item}
                         type="button"
+                        aria-pressed={isSelected}
+                        aria-label={`Accessibility accommodation: ${item}`}
                         onClick={() => toggleItem(selectedAccessibility, setSelectedAccessibility, item)}
                         className={`rounded-full px-2.5 py-1 text-xs font-medium border transition ${
                           isSelected
@@ -576,13 +591,15 @@ export function EventWizardModal({
                   <Flame className="h-3.5 w-3.5 mr-1 text-amber-400" />
                   <span>Cultural Traditions & Ceremonial Elements</span>
                 </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5" role="group" aria-label="Cultural Traditions">
                   {COMMON_CULTURAL.map((item) => {
                     const isSelected = selectedCultural.includes(item);
                     return (
                       <button
                         key={item}
                         type="button"
+                        aria-pressed={isSelected}
+                        aria-label={`Cultural tradition: ${item}`}
                         onClick={() => toggleItem(selectedCultural, setSelectedCultural, item)}
                         className={`rounded-full px-2.5 py-1 text-xs font-medium border transition ${
                           isSelected
@@ -617,11 +634,14 @@ export function EventWizardModal({
                           <span className="font-medium text-slate-300 block mb-1">
                             {labels[aspect]}
                           </span>
-                          <div className="flex space-x-1">
+                          <div className="flex space-x-1" role="radiogroup" aria-label={`${labels[aspect]} Priority`}>
                             {(["low", "medium", "high"] as PriorityLevel[]).map((level) => (
                               <button
                                 key={level}
                                 type="button"
+                                role="radio"
+                                aria-checked={priorities[aspect] === level}
+                                aria-label={`${labels[aspect]} ${level} priority`}
                                 onClick={() =>
                                   setPriorities((prev) => ({
                                     ...prev,
@@ -679,10 +699,11 @@ export function EventWizardModal({
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
                   Planning Engine Mode
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Planning Engine Mode">
                   <div
                     onClick={() => setMode("demo")}
-                    role="button"
+                    role="radio"
+                    aria-checked={mode === "demo"}
                     tabIndex={0}
                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setMode("demo")}
                     className={`cursor-pointer rounded-xl border p-3.5 transition text-left ${
@@ -702,7 +723,8 @@ export function EventWizardModal({
 
                   <div
                     onClick={() => setMode("ai")}
-                    role="button"
+                    role="radio"
+                    aria-checked={mode === "ai"}
                     tabIndex={0}
                     onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setMode("ai")}
                     className={`cursor-pointer rounded-xl border p-3.5 transition text-left ${

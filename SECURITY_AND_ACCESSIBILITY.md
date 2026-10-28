@@ -38,7 +38,7 @@ This document presents the formal technical review of **Gatherly — Celebration
 - **Runtime Output Validation**: AI-generated responses are validated against `EventPlanSchema.safeParse` before being returned to the client. If an LLM hallucinates malformed fields or violates schema constraints, the system automatically falls back to curated procedural data.
 
 ### 7. V14: OWASP Recommended Security Headers
-The server injects the following security headers on all HTTP responses:
+The server injects the following security headers globally via `next.config.ts` (`async headers()`) across all application routes (`/:path*`), and additionally verifies them in all API responses (`src/lib/security/headers.ts`):
 ```http
 X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
@@ -46,18 +46,30 @@ Referrer-Policy: strict-origin-when-cross-origin
 X-DNS-Prefetch-Control: on
 Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
 Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
+X-Permitted-Cross-Domain-Policies: none
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
 Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';
 ```
 
 ### 8. V15: CORS Preflight & IP Defense
 - **Explicit OPTIONS Handler**: `/api/plan` implements RFC-compliant CORS preflight handling returning `204 No Content` with configured `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, and `Access-Control-Max-Age: 86400`.
 - **IP Spoofing & Header Injection Prevention**: `getClientIp` validates IP strings against strict IPv4 (`^(\d{1,3}\.){3}\d{1,3}$`) and IPv6 (`^[a-fA-F0-9:]+$`) regular expressions before feeding into rate-limiting buckets, rejecting spoofed or malformed forwarded header values.
+- **Automated Security Unit Tests**: 16 dedicated unit tests in `src/lib/security/headers.test.ts` continuously verify header presence, IP regex safety, content-type checks, and origin verification.
 
 ---
 
 ## ♿ PART 2: WCAG 2.2 LEVEL AA ACCESSIBILITY AUDIT
 
 ### 1. Principle 1: Perceivable
+- **WAI-ARIA Tablist Pattern (Criterion 4.1.2 Level A)**: Configured dashboard navigation in `src/app/page.tsx` with full W3C ARIA tab pattern:
+  - Tablist container: `role="tablist"` and `aria-label="Celebration Planning Sections"`
+  - Tabs: `role="tab"`, `id="tab-{key}"`, `aria-selected={activeTab === tab.key}`, `aria-controls="tabpanel-{key}"`, and roving `tabIndex={activeTab === tab.key ? 0 : -1}`
+  - Tabpanels: `role="tabpanel"`, `id="tabpanel-{key}"`, `aria-labelledby="tab-{key}"`, and `tabIndex={0}`.
+- **WAI-ARIA Radiogroups, Radios & Progressbars**:
+  - Event Type, Venue Environment, Priorities, and Engine Mode selectors implement `role="radiogroup"` with child buttons having `role="radio"` and `aria-checked={isSelected}`.
+  - Wizard step progress bar implements `role="progressbar"` with `aria-valuenow={step}`, `aria-valuemin={1}`, `aria-valuemax={5}`, and `aria-label="Wizard step progress"`.
+  - Dietary, Accessibility, and Cultural multi-select chips implement W3C toggle button pattern with `aria-pressed={isSelected}` and explicit aria-labels.
 - **Skip to Main Content (Criterion 2.4.1 Level A)**: A top-level keyboard bypass link is embedded in `layout.tsx` linking to `<main id="main-content" tabIndex={-1}>`, allowing screen reader and keyboard users to bypass navigation header controls directly.
 - **SVG-AAM Role (Criterion 1.1.1)**: Visual SVG data charts (such as the Budget Allocation Donut) feature `role="img"` along with descriptive `aria-label` attributes to comply with SVG Accessibility API Mappings.
 - **Color Contrast (Criterion 1.4.3)**: All primary text (`text-white`, `text-slate-200`, `text-slate-300`) evaluated against dark background surfaces (`slate-950`, `slate-900`, `slate-800`) maintains contrast ratios well above the minimum **4.5:1** requirement (averaging 7.2:1 to 14.5:1).

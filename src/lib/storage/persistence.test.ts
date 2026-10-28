@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import {
   savePlanToStorage,
   loadPlanFromStorage,
@@ -11,6 +11,11 @@ import { generateDemoPlan, SAMPLE_WEDDING_PRESET } from "@/lib/demo/presets";
 describe("LocalStorage Persistence Engine", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("saves and loads a valid event plan successfully", () => {

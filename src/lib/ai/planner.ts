@@ -172,7 +172,10 @@ export async function generateEventPlan(
     return {
       plan,
       fallbackUsed: prefs.mode === "ai" && !apiKey,
-      errorReason: !apiKey ? "GEMINI_API_KEY not configured on server" : undefined,
+      errorReason:
+        prefs.mode === "ai" && !apiKey
+          ? "GEMINI_API_KEY not configured on server"
+          : undefined,
     };
   }
 

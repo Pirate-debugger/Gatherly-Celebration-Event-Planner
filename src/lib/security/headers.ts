@@ -19,6 +19,9 @@ export const SECURITY_HEADERS: Readonly<Record<string, string>> = Object.freeze(
   "X-DNS-Prefetch-Control": "on",
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+  "X-Permitted-Cross-Domain-Policies": "none",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Resource-Policy": "same-origin",
   "Content-Security-Policy":
     "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';",
 });
