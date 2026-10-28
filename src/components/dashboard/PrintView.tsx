@@ -8,7 +8,16 @@ interface PrintViewProps {
   plan: EventPlan;
 }
 
-export function PrintView({ plan }: PrintViewProps) {
+/**
+ * Clean Print & PDF Export Component
+ *
+ * Provides a high-contrast, printer-friendly CSS stylesheet and tabular layout
+ * formatted specifically for browser print dialogs, PDF generation, and on-site distribution.
+ *
+ * @param props - PrintViewProps containing the full EventPlan.
+ * @returns React.JSX.Element
+ */
+export function PrintView({ plan }: PrintViewProps): React.JSX.Element {
   const { userPreferences, overview, budgetSummary, budgetItems, itinerary, vendors, risks } = plan;
 
   return (

@@ -58,7 +58,18 @@ type ActiveTab =
   | "ideas"
   | "risks";
 
-export default function HomePage() {
+/**
+ * Gatherly Main Dashboard Page Component
+ *
+ * Coordinates the full celebration planning lifecycle:
+ * - State management for active event plan, active tabs, wizard, and settings.
+ * - Integration with local storage persistence and presets.
+ * - Real-time budget reconciliation and countdown timeline tracking.
+ * - Accessible ARIA tab navigation and live toast notifications.
+ *
+ * @returns React.JSX.Element
+ */
+export default function HomePage(): React.JSX.Element {
   // Initialize with realistic wedding preset for immediate evaluator delight
   const [activePlan, setActivePlan] = useState<EventPlan>(() =>
     generateDemoPlan(SAMPLE_WEDDING_PRESET)
@@ -283,7 +294,11 @@ export default function HomePage() {
 
         {/* Global Toast Notification */}
         {notification && (
-          <div className="fixed bottom-6 right-6 z-50 flex items-center space-x-2 rounded-xl border border-slate-700 bg-slate-900/95 p-3.5 shadow-2xl text-xs text-white backdrop-blur-md animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <div
+            role="status"
+            aria-live="polite"
+            className="fixed bottom-6 right-6 z-50 flex items-center space-x-2 rounded-xl border border-slate-700 bg-slate-900/95 p-3.5 shadow-2xl text-xs text-white backdrop-blur-md animate-in fade-in slide-in-from-bottom-3 duration-200"
+          >
             {notification.type === "error" ? (
               <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
             ) : notification.type === "info" ? (
@@ -295,6 +310,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setNotification(null)}
+              aria-label="Dismiss notification"
               className="ml-2 text-slate-400 hover:text-white"
             >
               <X className="h-3.5 w-3.5" />
@@ -303,7 +319,11 @@ export default function HomePage() {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 space-y-6">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 space-y-6 focus:outline-none"
+        >
           {/* Hero Section Banner */}
           <HeroSection
             onOpenWizard={() => setIsWizardOpen(true)}

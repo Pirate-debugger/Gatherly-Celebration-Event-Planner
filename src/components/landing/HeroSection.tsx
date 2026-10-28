@@ -18,7 +18,16 @@ interface HeroSectionProps {
   onLoadPreset: (presetKey: "wedding" | "birthday" | "community") => void;
 }
 
-export function HeroSection({ onOpenWizard, onLoadPreset }: HeroSectionProps) {
+/**
+ * Landing Page Hero Banner Component
+ *
+ * Displays primary value propositions, quick one-click celebration template selectors
+ * (Wedding, Birthday, Community), and call-to-actions to launch the planning assistant.
+ *
+ * @param props - HeroSectionProps containing wizard launch and preset loaders.
+ * @returns React.JSX.Element
+ */
+export function HeroSection({ onOpenWizard, onLoadPreset }: HeroSectionProps): React.JSX.Element {
   return (
     <section className="relative overflow-hidden py-12 sm:py-20 no-print">
       {/* Background ambient gradient glow */}

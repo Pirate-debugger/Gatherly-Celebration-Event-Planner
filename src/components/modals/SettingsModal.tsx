@@ -23,12 +23,21 @@ interface SettingsModalProps {
   isAiAvailable: boolean;
 }
 
+/**
+ * Application Settings & Privacy Management Modal Component
+ *
+ * Provides inspection of local storage usage stats, AI API availability status,
+ * keyboard shortcut legends, and data reset / wipe operations.
+ *
+ * @param props - SettingsModalProps containing visibility and reset handler.
+ * @returns React.JSX.Element | null
+ */
 export function SettingsModal({
   isOpen,
   onClose,
   onResetToDefaults,
   isAiAvailable,
-}: SettingsModalProps) {
+}: SettingsModalProps): React.JSX.Element | null {
   const [resetConfirmed, setResetConfirmed] = useState(false);
   const storageStats = isOpen ? getStorageUsage() : { bytes: 0, lastSaved: null };
 

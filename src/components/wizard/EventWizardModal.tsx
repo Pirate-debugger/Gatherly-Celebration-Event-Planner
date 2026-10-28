@@ -67,12 +67,25 @@ const COMMON_CULTURAL = [
   "Lantern / Ribbon Send-Off",
 ];
 
+/**
+ * Interactive Event Planning Wizard Modal Component
+ *
+ * Multi-step guided modal to capture celebration preferences:
+ * Step 1: Core Details (Title, Type, Date, Duration, Location, Guests, Budget)
+ * Step 2: Atmosphere & Aesthetic (Venue type, Theme, Color accents)
+ * Step 3: Inclusivity & Priorities (Dietary, Accessibility, Traditions, Tier weighting)
+ * Step 4: Special Logistics & Engine (Notes, AI synthesis toggle)
+ * Step 5: Summary & Validation
+ *
+ * @param props - EventWizardModalProps containing isOpen, onClose, and onSubmit callbacks.
+ * @returns React.JSX.Element | null
+ */
 export function EventWizardModal({
   isOpen,
   onClose,
   onSubmit,
   isSubmitting = false,
-}: EventWizardModalProps) {
+}: EventWizardModalProps): React.JSX.Element | null {
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
 

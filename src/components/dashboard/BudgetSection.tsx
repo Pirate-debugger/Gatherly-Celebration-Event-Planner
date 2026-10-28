@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   PlusCircle,
   Search,
   CheckCircle2,
   AlertTriangle,
   Trash2,
+  X,
 } from "lucide-react";
 import {
   BudgetItem,
@@ -39,14 +40,39 @@ const CATEGORY_COLORS: Record<BudgetCategory, string> = {
   contingency_reserve: "#EAB308", // Yellow / Gold
 };
 
+/**
+ * Interactive Budget Section Component
+ *
+ * Renders budget overview cards, visual SVG donut allocation charts, category filters,
+ * line item confirmation checkboxes, and custom expense management.
+ *
+ * @param props - BudgetSectionProps containing items, summary, currency, and update callback.
+ * @returns React.JSX.Element
+ */
 export function BudgetSection({
   items,
   summary,
   currency,
   onUpdateItems,
-}: BudgetSectionProps) {
+}: BudgetSectionProps): React.JSX.Element {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newCategory, setNewCategory] = useState<BudgetCategory>("catering_beverages");
+  const [newCost, setNewCost] = useState(500);
+  const [newDescription, setNewDescription] = useState("");
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isAddModalOpen) {
+        setIsAddModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isAddModalOpen]);
 
   // Precompute SVG segments without mutating variables during JSX render
   const svgSegments = useMemo(() => {
@@ -76,13 +102,6 @@ export function BudgetSection({
 
     return segments;
   }, [summary.categoryBreakdown]);
-
-  // New Item Modal Form State
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newCategory, setNewCategory] = useState<BudgetCategory>("catering_beverages");
-  const [newCost, setNewCost] = useState(500);
-  const [newDescription, setNewDescription] = useState("");
 
   // Filtered items
   const filteredItems = items.filter((item) => {
@@ -184,6 +203,7 @@ export function BudgetSection({
           {/* SVG Donut Visualizer */}
           <div className="relative flex items-center justify-center my-6">
             <svg
+              role="img"
               className="w-48 h-48 -rotate-90 transform"
               viewBox="0 0 100 100"
               aria-label="Category allocation donut chart"
@@ -451,18 +471,34 @@ export function BudgetSection({
         <div
           role="dialog"
           aria-modal="true"
+          aria-labelledby="budget-add-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
         >
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl text-left">
-            <h3 className="text-base font-bold text-white mb-1">Add Custom Expense</h3>
+          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl text-left relative">
+            <div className="flex items-center justify-between mb-1">
+              <h3 id="budget-add-title" className="text-base font-bold text-white">
+                Add Custom Expense
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800"
+                aria-label="Close add custom expense dialog"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
             <p className="text-xs text-slate-400 mb-4">
               Create an additional line item to track custom celebration costs.
             </p>
 
             <form onSubmit={handleAddSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Item Name *</label>
+                <label htmlFor="budget-new-name" className="block font-semibold text-slate-300 mb-1">
+                  Item Name *
+                </label>
                 <input
+                  id="budget-new-name"
                   type="text"
                   required
                   value={newName}
@@ -473,8 +509,11 @@ export function BudgetSection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Category *</label>
+                <label htmlFor="budget-new-category" className="block font-semibold text-slate-300 mb-1">
+                  Category *
+                </label>
                 <select
+                  id="budget-new-category"
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value as BudgetCategory)}
                   className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-white focus:border-violet-500"
@@ -488,10 +527,11 @@ export function BudgetSection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">
+                <label htmlFor="budget-new-cost" className="block font-semibold text-slate-300 mb-1">
                   Estimated Cost ({currency}) *
                 </label>
                 <input
+                  id="budget-new-cost"
                   type="number"
                   min="0"
                   step="10"
@@ -503,8 +543,11 @@ export function BudgetSection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Description / Notes</label>
+                <label htmlFor="budget-new-notes" className="block font-semibold text-slate-300 mb-1">
+                  Description / Notes
+                </label>
                 <input
+                  id="budget-new-notes"
                   type="text"
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}

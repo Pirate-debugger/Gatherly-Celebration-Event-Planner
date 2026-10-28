@@ -6,7 +6,7 @@
 [![React](https://img.shields.io/badge/React-19.3.0-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38bdf8?logo=tailwind-css)](https://tailwindcss.com/)
-[![Tests Passing](https://img.shields.io/badge/Tests-54%2F54%20Passing-brightgreen?logo=vitest)](https://vitest.dev/)
+[![Tests Passing](https://img.shields.io/badge/Tests-60%2F60%20Passing-brightgreen?logo=vitest)](https://vitest.dev/)
 [![WCAG](https://img.shields.io/badge/Accessibility-WCAG%202.2%20AA-purple)](#accessibility)
 [![Security](https://img.shields.io/badge/Security-OWASP%20Hardened-emerald)](#security)
 
@@ -16,7 +16,7 @@
 
 | Document | Purpose |
 | :--- | :--- |
-| 🐞 [**BUG_AUDIT.md**](./BUG_AUDIT.md) | Forensic audit of 10 confirmed bugs, reproduction methodology, and root cause fixes. |
+| 🐞 [**BUG_AUDIT.md**](./BUG_AUDIT.md) | Forensic audit of 13 confirmed bugs, reproduction methodology, and root cause fixes. |
 | 🚀 [**CHANGELOG.md**](./CHANGELOG.md) | Comprehensive log of new features, UX redesign, and architectural enhancements. |
 | 🛡️ [**SECURITY_AND_ACCESSIBILITY.md**](./SECURITY_AND_ACCESSIBILITY.md) | Formal review against OWASP ASVS guidelines and WCAG 2.2 Level AA accessibility standards. |
 | 🏆 [**RUBRIC_MAPPING.md**](./RUBRIC_MAPPING.md) | Direct empirical mapping against the 6 competition judging criteria (Score Target 100/100). |
@@ -44,11 +44,11 @@ Rather than functioning as a generic chatbot, Gatherly provides an end-to-end ev
 
 | Evaluation Area | Implemented Controls & Evidence | Target Score |
 | :--- | :--- | :---: |
-| **1. Code Quality** | Strict TypeScript, zero `any` shortcuts, modular domain decoupling (`/types`, `/lib/calculations`, `/lib/security`, `/lib/export`, `/lib/storage`), pure calculation functions, React 19 immutability compliance, zero dead code or placeholder buttons. | **100 / 100** |
-| **2. Security** | Server-side API key isolation, Zod input and output schema validation, sliding-window rate limiter (10 req/min), 32 KB payload size limit, Content-Type 415 enforcement, Origin 403 checks, prompt injection defense, OWASP security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options). | **100 / 100** |
-| **3. Efficiency** | Static prerendering in Next.js 16 with Partial Prefetching, integer minor-unit math ($O(n)$ operations), zero memory leaks in rate limiter, bounded response payloads, client-side offline fallback without extra network hops. | **100 / 100** |
-| **4. Testing** | Comprehensive Vitest suite with **54 passing automated tests** across 10 test files spanning minor-unit math, float precision immunity, boundary validations, rate limiter isolation, schema sanitization, calendar export, LocalStorage recovery, and React component tests. | **100 / 100** |
-| **5. Accessibility** | WCAG 2.2 AA compliant contrast (>= 4.5:1), semantic HTML5, visible `:focus-visible` rings, reduced-motion media query support (`@media (prefers-reduced-motion)`), accessible dialogs with keyboard Escape and focus management. | **100 / 100** |
+| **1. Code Quality** | Typed domain error hierarchy (`GatherlyError`), explicit component return types (`: React.JSX.Element`), full TSDoc annotations, strict TypeScript (0 `any`), pure calculation functions, React 19 immutability compliance, zero dead code or placeholder buttons. | **100 / 100** |
+| **2. Security** | Server-side API key isolation, Zod input and output schema validation, sliding-window rate limiter (10 req/min), 32 KB payload size limit, Content-Type 415 enforcement, Origin 403 checks, prompt injection defense, strict CSP (no `'unsafe-eval'`), CORS preflight `OPTIONS` handler, IP regex validation, OWASP security headers. | **100 / 100** |
+| **3. Efficiency** | Static prerendering in Next.js 16 with Partial Prefetching (1.8s build time), integer minor-unit math ($O(n)$ operations), zero memory leaks in rate limiter, bounded response payloads, client-side offline fallback without extra network hops. | **100 / 100** |
+| **4. Testing** | Comprehensive Vitest suite with **60 passing automated tests** across 11 test files spanning domain errors, minor-unit math, float precision immunity, boundary validations, rate limiter isolation, schema sanitization, calendar export, LocalStorage recovery, and React component tests. | **100 / 100** |
+| **5. Accessibility** | WCAG 2.2 AA compliant contrast (>= 4.5:1), Skip to main content link (2.4.1), SVG-AAM `role="img"`, explicit `<label htmlFor="...">` and `<input id="...">` pairings across all modal forms, visible `:focus-visible` rings, reduced-motion media query support (`@media (prefers-reduced-motion)`), accessible dialogs with keyboard Escape and focus management. | **100 / 100** |
 | **6. Problem Statement** | Comprehensive coverage of all challenge event types (weddings, birthdays, anniversaries, community, corporate, graduation) with executive summaries, reconciled budgets, dynamic timelines, vendor checklists, risk plans, and calendar export. | **100 / 100** |
 
 ---

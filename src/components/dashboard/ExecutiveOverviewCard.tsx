@@ -20,7 +20,17 @@ interface ExecutiveOverviewCardProps {
   plan: EventPlan;
 }
 
-export function ExecutiveOverviewCard({ plan }: ExecutiveOverviewCardProps) {
+/**
+ * Executive Overview KPI Card Component
+ *
+ * Displays top-level key performance metrics for the celebration including
+ * total budget, allocation percentage, guest count, vendor contracts, countdown status,
+ * and high-priority alerts.
+ *
+ * @param props - ExecutiveOverviewCardProps containing the active EventPlan.
+ * @returns React.JSX.Element
+ */
+export function ExecutiveOverviewCard({ plan }: ExecutiveOverviewCardProps): React.JSX.Element {
   const { userPreferences, overview, budgetSummary, timeline, vendors } = plan;
   const progress = calculateTimelineProgress(timeline);
 

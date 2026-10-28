@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Users,
   Phone,
@@ -66,13 +66,33 @@ const STATUS_LABELS: Record<
   },
 };
 
+/**
+ * Interactive Vendor Hub Component
+ *
+ * Renders vendor cards with lifecycle statuses, contact info, deposit trackers,
+ * vetted interview questions, and a dialog to onboard custom vendor partners.
+ *
+ * @param props - VendorHubSectionProps containing vendors list, currency, and update handler.
+ * @returns React.JSX.Element
+ */
 export function VendorHubSection({
   vendors,
   currency,
   onUpdateVendors,
-}: VendorHubSectionProps) {
+}: VendorHubSectionProps): React.JSX.Element {
   const [checkedQuestions, setCheckedQuestions] = useState<Record<string, boolean>>({});
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isAddModalOpen) {
+        setIsAddModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isAddModalOpen]);
 
   // New Vendor Form State
   const [newRole, setNewRole] = useState("");
@@ -352,18 +372,20 @@ export function VendorHubSection({
         <div
           role="dialog"
           aria-modal="true"
+          aria-labelledby="vendor-add-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200"
         >
           <div className="relative w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl text-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white flex items-center space-x-2">
+              <h3 id="vendor-add-title" className="text-base font-bold text-white flex items-center space-x-2">
                 <Users className="h-4 w-4 text-violet-400" />
                 <span>Add Custom Vendor Partner</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                aria-label="Close add custom vendor dialog"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -372,10 +394,11 @@ export function VendorHubSection({
             <form onSubmit={handleAddSubmit} className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label htmlFor="vendor-new-role" className="block font-semibold text-slate-300 mb-1">
                     Vendor Role / Specialty *
                   </label>
                   <input
+                    id="vendor-new-role"
                     type="text"
                     required
                     value={newRole}
@@ -386,10 +409,11 @@ export function VendorHubSection({
                 </div>
 
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label htmlFor="vendor-new-category" className="block font-semibold text-slate-300 mb-1">
                     Budget Category *
                   </label>
                   <select
+                    id="vendor-new-category"
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as BudgetCategory)}
                     className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-white focus:border-violet-500"
@@ -405,10 +429,11 @@ export function VendorHubSection({
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label htmlFor="vendor-new-contact-name" className="block font-semibold text-slate-300 mb-1">
                     Contact Name
                   </label>
                   <input
+                    id="vendor-new-contact-name"
                     type="text"
                     value={newContactName}
                     onChange={(e) => setNewContactName(e.target.value)}
@@ -417,10 +442,11 @@ export function VendorHubSection({
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label htmlFor="vendor-new-contact-email" className="block font-semibold text-slate-300 mb-1">
                     Email
                   </label>
                   <input
+                    id="vendor-new-contact-email"
                     type="email"
                     value={newContactEmail}
                     onChange={(e) => setNewContactEmail(e.target.value)}
@@ -429,10 +455,11 @@ export function VendorHubSection({
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label htmlFor="vendor-new-contact-phone" className="block font-semibold text-slate-300 mb-1">
                     Phone
                   </label>
                   <input
+                    id="vendor-new-contact-phone"
                     type="tel"
                     value={newContactPhone}
                     onChange={(e) => setNewContactPhone(e.target.value)}
@@ -444,10 +471,11 @@ export function VendorHubSection({
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label htmlFor="vendor-new-cost" className="block font-semibold text-slate-300 mb-1">
                     Estimated Cost ({currency}) *
                   </label>
                   <input
+                    id="vendor-new-cost"
                     type="number"
                     min="0"
                     step="50"
@@ -458,10 +486,11 @@ export function VendorHubSection({
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label htmlFor="vendor-new-deposit" className="block font-semibold text-slate-300 mb-1">
                     Deposit Amount ({currency})
                   </label>
                   <input
+                    id="vendor-new-deposit"
                     type="number"
                     min="0"
                     step="50"
@@ -471,10 +500,11 @@ export function VendorHubSection({
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">
+                  <label htmlFor="vendor-new-deposit-date" className="block font-semibold text-slate-300 mb-1">
                     Deposit Due Date
                   </label>
                   <input
+                    id="vendor-new-deposit-date"
                     type="date"
                     value={newDepositDueDate}
                     onChange={(e) => setNewDepositDueDate(e.target.value)}
@@ -484,10 +514,11 @@ export function VendorHubSection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">
+                <label htmlFor="vendor-new-reminder" className="block font-semibold text-slate-300 mb-1">
                   Payment Reminder / Terms Note
                 </label>
                 <input
+                  id="vendor-new-reminder"
                   type="text"
                   value={newPaymentReminder}
                   onChange={(e) => setNewPaymentReminder(e.target.value)}
@@ -497,10 +528,11 @@ export function VendorHubSection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">
+                <label htmlFor="vendor-new-description" className="block font-semibold text-slate-300 mb-1">
                   Scope & Service Description
                 </label>
                 <textarea
+                  id="vendor-new-description"
                   rows={2}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}

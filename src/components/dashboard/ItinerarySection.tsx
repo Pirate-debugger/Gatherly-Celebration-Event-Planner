@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Clock,
   MapPin,
@@ -8,6 +8,7 @@ import {
   PlusCircle,
   FileText,
   Trash2,
+  X,
 } from "lucide-react";
 import { ItineraryItem } from "@/types/event";
 
@@ -16,10 +17,19 @@ interface ItinerarySectionProps {
   onUpdateItinerary: (updated: ItineraryItem[]) => void;
 }
 
+/**
+ * Event-Day Run of Show & Itinerary Component
+ *
+ * Renders chronological event day timeline segments, location markers,
+ * personnel in charge, logistical cues, and custom itinerary segment creation.
+ *
+ * @param props - ItinerarySectionProps containing itinerary list and update handler.
+ * @returns React.JSX.Element
+ */
 export function ItinerarySection({
   itinerary,
   onUpdateItinerary,
-}: ItinerarySectionProps) {
+}: ItinerarySectionProps): React.JSX.Element {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newTime, setNewTime] = useState("06:00 PM");
   const [newEndTime, setNewEndTime] = useState("07:00 PM");
@@ -27,6 +37,17 @@ export function ItinerarySection({
   const [newLocation, setNewLocation] = useState("Main Hall");
   const [newResponsible, setNewResponsible] = useState("Event Coordinator");
   const [newNotes, setNewNotes] = useState("");
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isAddModalOpen) {
+        setIsAddModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isAddModalOpen]);
 
   const handleDeleteItem = (id: string) => {
     onUpdateItinerary(itinerary.filter((item) => item.id !== id));
@@ -130,10 +151,23 @@ export function ItinerarySection({
         <div
           role="dialog"
           aria-modal="true"
+          aria-labelledby="itinerary-add-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
         >
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl text-left">
-            <h3 className="text-base font-bold text-white mb-1">Add Program Segment</h3>
+          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl text-left relative">
+            <div className="flex items-center justify-between mb-1">
+              <h3 id="itinerary-add-title" className="text-base font-bold text-white">
+                Add Program Segment
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800"
+                aria-label="Close add program segment dialog"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
             <p className="text-xs text-slate-400 mb-4">
               Specify the time slot, activity, and team member in charge.
             </p>
@@ -141,8 +175,11 @@ export function ItinerarySection({
             <form onSubmit={handleAddSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Start Time *</label>
+                  <label htmlFor="itinerary-new-start-time" className="block font-semibold text-slate-300 mb-1">
+                    Start Time *
+                  </label>
                   <input
+                    id="itinerary-new-start-time"
                     type="text"
                     required
                     value={newTime}
@@ -152,8 +189,11 @@ export function ItinerarySection({
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">End Time</label>
+                  <label htmlFor="itinerary-new-end-time" className="block font-semibold text-slate-300 mb-1">
+                    End Time
+                  </label>
                   <input
+                    id="itinerary-new-end-time"
                     type="text"
                     value={newEndTime}
                     onChange={(e) => setNewEndTime(e.target.value)}
@@ -164,8 +204,11 @@ export function ItinerarySection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Activity / Segment *</label>
+                <label htmlFor="itinerary-new-activity" className="block font-semibold text-slate-300 mb-1">
+                  Activity / Segment *
+                </label>
                 <input
+                  id="itinerary-new-activity"
                   type="text"
                   required
                   value={newActivity}
@@ -177,8 +220,11 @@ export function ItinerarySection({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Location</label>
+                  <label htmlFor="itinerary-new-location" className="block font-semibold text-slate-300 mb-1">
+                    Location
+                  </label>
                   <input
+                    id="itinerary-new-location"
                     type="text"
                     value={newLocation}
                     onChange={(e) => setNewLocation(e.target.value)}
@@ -187,8 +233,11 @@ export function ItinerarySection({
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Lead Responsible</label>
+                  <label htmlFor="itinerary-new-responsible" className="block font-semibold text-slate-300 mb-1">
+                    Lead Responsible
+                  </label>
                   <input
+                    id="itinerary-new-responsible"
                     type="text"
                     value={newResponsible}
                     onChange={(e) => setNewResponsible(e.target.value)}
@@ -199,8 +248,11 @@ export function ItinerarySection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Cues / Notes</label>
+                <label htmlFor="itinerary-new-notes" className="block font-semibold text-slate-300 mb-1">
+                  Cues / Notes
+                </label>
                 <input
+                  id="itinerary-new-notes"
                   type="text"
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}

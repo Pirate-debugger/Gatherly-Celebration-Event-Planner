@@ -10,6 +10,7 @@ import {
   Search,
   Trash2,
   Link2,
+  X,
 } from "lucide-react";
 import {
   TimelineTask,
@@ -29,15 +30,36 @@ interface TimelineSectionProps {
   onUpdateTasks: (updated: TimelineTask[]) => void;
 }
 
+/**
+ * Interactive Timeline & Milestones Component
+ *
+ * Renders planning phase milestones, countdown progress bars, overdue alerts,
+ * interactive task status toggles (todo -> in progress -> completed), and custom task creation.
+ *
+ * @param props - TimelineSectionProps containing tasks list, celebration event date, and update handler.
+ * @returns React.JSX.Element
+ */
 export function TimelineSection({
   tasks,
   eventDate,
   onUpdateTasks,
-}: TimelineSectionProps) {
+}: TimelineSectionProps): React.JSX.Element {
   const [searchQuery, setSearchQuery] = useState("");
   const [phaseFilter, setPhaseFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isAddModalOpen) {
+        setIsAddModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isAddModalOpen]);
 
   // Client-side live date detection (preserves SSR stability with zero hydration error)
   const [todayStr, setTodayStr] = useState<string>("2027-01-01");
@@ -53,7 +75,6 @@ export function TimelineSection({
   }, []);
 
   // New Task Modal Form State
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newPhase, setNewPhase] = useState<TimelinePhase>("1_to_2_months");
@@ -388,18 +409,34 @@ export function TimelineSection({
         <div
           role="dialog"
           aria-modal="true"
+          aria-labelledby="timeline-add-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
         >
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl text-left">
-            <h3 className="text-base font-bold text-white mb-1">Add Timeline Task</h3>
+          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl text-left relative">
+            <div className="flex items-center justify-between mb-1">
+              <h3 id="timeline-add-title" className="text-base font-bold text-white">
+                Add Timeline Task
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-800"
+                aria-label="Close add timeline task dialog"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
             <p className="text-xs text-slate-400 mb-4">
               Schedule an essential preparation task or deadline.
             </p>
 
             <form onSubmit={handleAddTask} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Task Title *</label>
+                <label htmlFor="timeline-new-title" className="block font-semibold text-slate-300 mb-1">
+                  Task Title *
+                </label>
                 <input
+                  id="timeline-new-title"
                   type="text"
                   required
                   value={newTitle}
@@ -410,8 +447,11 @@ export function TimelineSection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Phase</label>
+                <label htmlFor="timeline-new-phase" className="block font-semibold text-slate-300 mb-1">
+                  Phase
+                </label>
                 <select
+                  id="timeline-new-phase"
                   value={newPhase}
                   onChange={(e) => setNewPhase(e.target.value as TimelinePhase)}
                   className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-white focus:border-violet-500"
@@ -426,8 +466,11 @@ export function TimelineSection({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Target Date</label>
+                  <label htmlFor="timeline-new-target-date" className="block font-semibold text-slate-300 mb-1">
+                    Target Date
+                  </label>
                   <input
+                    id="timeline-new-target-date"
                     type="date"
                     required
                     value={newTargetDate}
@@ -437,8 +480,11 @@ export function TimelineSection({
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-300 mb-1">Priority</label>
+                  <label htmlFor="timeline-new-priority" className="block font-semibold text-slate-300 mb-1">
+                    Priority
+                  </label>
                   <select
+                    id="timeline-new-priority"
                     value={newPriority}
                     onChange={(e) => setNewPriority(e.target.value as PriorityLevel)}
                     className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-white focus:border-violet-500"
@@ -451,8 +497,11 @@ export function TimelineSection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Category</label>
+                <label htmlFor="timeline-new-category" className="block font-semibold text-slate-300 mb-1">
+                  Category
+                </label>
                 <input
+                  id="timeline-new-category"
                   type="text"
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
@@ -462,8 +511,11 @@ export function TimelineSection({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Description / Notes</label>
+                <label htmlFor="timeline-new-description" className="block font-semibold text-slate-300 mb-1">
+                  Description / Notes
+                </label>
                 <input
+                  id="timeline-new-description"
                   type="text"
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}

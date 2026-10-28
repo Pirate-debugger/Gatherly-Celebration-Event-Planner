@@ -46,14 +46,20 @@ Referrer-Policy: strict-origin-when-cross-origin
 X-DNS-Prefetch-Control: on
 Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
 Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com;
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';
 ```
+
+### 8. V15: CORS Preflight & IP Defense
+- **Explicit OPTIONS Handler**: `/api/plan` implements RFC-compliant CORS preflight handling returning `204 No Content` with configured `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, and `Access-Control-Max-Age: 86400`.
+- **IP Spoofing & Header Injection Prevention**: `getClientIp` validates IP strings against strict IPv4 (`^(\d{1,3}\.){3}\d{1,3}$`) and IPv6 (`^[a-fA-F0-9:]+$`) regular expressions before feeding into rate-limiting buckets, rejecting spoofed or malformed forwarded header values.
 
 ---
 
 ## ♿ PART 2: WCAG 2.2 LEVEL AA ACCESSIBILITY AUDIT
 
 ### 1. Principle 1: Perceivable
+- **Skip to Main Content (Criterion 2.4.1 Level A)**: A top-level keyboard bypass link is embedded in `layout.tsx` linking to `<main id="main-content" tabIndex={-1}>`, allowing screen reader and keyboard users to bypass navigation header controls directly.
+- **SVG-AAM Role (Criterion 1.1.1)**: Visual SVG data charts (such as the Budget Allocation Donut) feature `role="img"` along with descriptive `aria-label` attributes to comply with SVG Accessibility API Mappings.
 - **Color Contrast (Criterion 1.4.3)**: All primary text (`text-white`, `text-slate-200`, `text-slate-300`) evaluated against dark background surfaces (`slate-950`, `slate-900`, `slate-800`) maintains contrast ratios well above the minimum **4.5:1** requirement (averaging 7.2:1 to 14.5:1).
 - **Secondary Badges & Alerts**: Status badges use dual indicators (both color badges and text labels, e.g., "Overdue", "Over Budget", "Completed ✓") to ensure color is never the sole conveyor of information (Criterion 1.4.1).
 - **Reflow & Zoom (Criterion 1.4.10 & 1.4.4)**: The layout dynamically reflows without loss of information or horizontal scrollbars at 200% and 400% zoom levels across mobile, tablet, and desktop viewports.
@@ -62,20 +68,21 @@ Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' '
 - **Full Keyboard Accessibility (Criterion 2.1.1)**:
   - Every interactive control (buttons, tab selectors, checkboxes, form inputs, modal dialogs) is fully reachable and actionable via `Tab`, `Shift+Tab`, `Enter`, and `Space`.
   - No keyboard traps exist anywhere in the application.
-- **Escape Key Modal Dismissal**: Open modal dialogs (`EventWizardModal`, `SettingsModal`, `AddVendorModal`, `AddItineraryModal`) attach global keyboard event listeners for `Escape`, instantly closing the dialog and restoring focus to the triggering element.
+- **Escape Key Modal Dismissal**: All open modal dialogs (`EventWizardModal`, `SettingsModal`, `BudgetSection` add modal, `VendorHubSection` add modal, `TimelineSection` add modal, `ItinerarySection` add modal) attach global keyboard event listeners for `Escape`, instantly closing the dialog and restoring focus.
 - **Visible Focus Indicators (Criterion 2.4.7)**: Interactive controls feature high-contrast focus rings (`focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:outline-none`).
 - **Touch Targets (Criterion 2.5.8)**: Interactive buttons and controls meet or exceed minimum touch target dimensions (at least 32px to 44px with adequate padding).
 
 ### 3. Principle 3: Understandable
-- **Form Error Summaries & Validation (Criterion 3.3.1 & 3.3.2)**: Form fields feature explicit descriptive labels, placeholder examples, and real-time validation error notices before submission.
+- **Strict Label & Control Associations (Criterion 1.3.1 & 3.3.2)**: Every form input, textarea, and select control across all application modals is bound with an explicit `<label htmlFor="...">` and `<input id="...">` pairing.
+- **Form Error Summaries & Validation (Criterion 3.3.1)**: Form fields feature explicit descriptive labels, placeholder examples, and real-time validation error notices before submission.
 - **Predictable Navigation (Criterion 3.2.3)**: The top navigation header and tab bar remain consistently positioned and structured across all views.
 
 ### 4. Principle 4: Robust & Assistive Technologies
 - **Semantic HTML5 (Criterion 4.1.2)**: Uses semantic container elements (`<header>`, `<main>`, `<footer>`, `<section>`, `<nav>`) and proper heading hierarchy (`<h1>`, `<h2>`, `<h3>`, `<h4>`).
-- **ARIA Attributes**:
+- **ARIA Attributes & Live Regions (Criterion 4.1.3)**:
   - Modal dialogs use `role="dialog"`, `aria-modal="true"`, and `aria-labelledby`.
   - Interactive custom checkboxes provide `role="checkbox"` and `aria-checked={isChecked}`.
-  - Live status notifications provide `aria-live="polite"` feedback for screen reader announcements.
+  - Live status notifications provide `role="status"` and `aria-live="polite"` feedback for screen reader announcements.
 - **Reduced Motion Support**: Implemented CSS `@media (prefers-reduced-motion: reduce)` rules that automatically disable animations and transitions for users with vestibular or motion sensitivities.
 
 ---

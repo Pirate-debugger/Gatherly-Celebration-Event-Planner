@@ -37,7 +37,16 @@ const SEVERITY_CONFIG: Record<
   },
 };
 
-export function RiskContingencySection({ risks }: RiskContingencySectionProps) {
+/**
+ * Risk Mitigation Matrix & Emergency Contingency Protocol Component
+ *
+ * Renders categorized risks with severity indicators, proactive prevention measures,
+ * activation triggers, and emergency contacts.
+ *
+ * @param props - RiskContingencySectionProps containing risks array.
+ * @returns React.JSX.Element
+ */
+export function RiskContingencySection({ risks }: RiskContingencySectionProps): React.JSX.Element {
   return (
     <div className="space-y-6">
       <div>

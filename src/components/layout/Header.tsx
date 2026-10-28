@@ -26,6 +26,15 @@ interface HeaderProps {
   isAiAvailable?: boolean;
 }
 
+/**
+ * Global Application Header Component
+ *
+ * Provides branding, status indicator, preset selectors (Wedding, Birthday, Community),
+ * export/import actions (JSON and iCalendar .ics), quick print trigger, and settings.
+ *
+ * @param props - HeaderProps containing plan state and action callbacks.
+ * @returns React.JSX.Element
+ */
 export function Header({
   currentPlan,
   onOpenWizard,
@@ -36,7 +45,7 @@ export function Header({
   onPrint,
   onOpenSettings,
   isAiAvailable = false,
-}: HeaderProps) {
+}: HeaderProps): React.JSX.Element {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

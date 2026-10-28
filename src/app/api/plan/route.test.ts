@@ -1,11 +1,20 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { GET, POST } from "./route";
+import { GET, POST, OPTIONS } from "./route";
 import { NextRequest } from "next/server";
 import { globalRateLimiter } from "@/lib/security/rate-limiter";
 
 describe("API Route: /api/plan", () => {
   beforeEach(() => {
     globalRateLimiter.reset();
+  });
+
+  describe("OPTIONS /api/plan", () => {
+    it("responds to CORS preflight with 204 and allowed methods", async () => {
+      const res = await OPTIONS();
+      expect(res.status).toBe(204);
+      expect(res.headers.get("access-control-allow-methods")).toContain("POST");
+      expect(res.headers.get("x-frame-options")).toBe("DENY");
+    });
   });
 
   describe("GET /api/plan", () => {

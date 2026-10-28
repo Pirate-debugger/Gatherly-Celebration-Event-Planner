@@ -56,10 +56,21 @@ export const VendorStatusEnum = z.enum([
   "fully_paid",
 ]);
 
-// Basic sanitization helper to strip dangerous script tags or injection strings
-function sanitizeString(val: string): string {
+/**
+ * Comprehensive XSS and injection sanitization helper.
+ * Strips script tags, iframe embeds, style tags, all HTML tags, javascript: protocols,
+ * and dangerous inline event handler attributes (e.g. onerror=, onclick=).
+ */
+export function sanitizeString(val: string): string {
+  if (!val) return "";
   return val
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+    .replace(/<\/?[a-z][a-z0-9]*\b[^>]*>/gi, "")
+    .replace(/javascript:/gi, "")
+    .replace(/vbscript:/gi, "")
+    .replace(/on\w+\s*=/gi, "")
     .trim();
 }
 

@@ -18,7 +18,16 @@ interface PersonalizedIdeasSectionProps {
   ideas: PersonalizedIdeas;
 }
 
-export function PersonalizedIdeasSection({ ideas }: PersonalizedIdeasSectionProps) {
+/**
+ * Curated Experiential Concepts & Personalized Ideas Component
+ *
+ * Renders thematic decor accents, culinary pairing concepts, interactive guest experiences,
+ * invitation wording templates with one-click copy, and sustainability practices.
+ *
+ * @param props - PersonalizedIdeasSectionProps containing curated ideas.
+ * @returns React.JSX.Element
+ */
+export function PersonalizedIdeasSection({ ideas }: PersonalizedIdeasSectionProps): React.JSX.Element {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const handleCopyWording = (wording: string, index: number) => {
