@@ -5,12 +5,14 @@
  * GET  /api/plan (Health & status check)
  *
  * Security & Reliability Controls:
- * - Rate limiting (10 req/min per IP)
- * - Maximum request body size check (32 KB)
- * - Strict Zod schema validation on input
+ * - Origin / CSRF validation
+ * - Content-Type validation (415 Unsupported Media Type for non-JSON)
+ * - Request body size check (413 Payload Too Large for > 32 KB)
+ * - Sliding-window rate limiting (429 Too Many Requests)
+ * - Strict Zod schema validation on input (400 Validation Error)
  * - Server-only API key handling
  * - Strict schema validation on output
- * - Graceful degradation to curated demo planner
+ * - Graceful degradation to curated procedural planner
  * - Safe sanitized error responses without stack traces
  */
 
@@ -22,6 +24,8 @@ import {
   applySecurityHeaders,
   getClientIp,
   isRequestBodyWithinLimit,
+  isJsonContentType,
+  isOriginAllowed,
 } from "@/lib/security/headers";
 
 export async function GET() {
@@ -44,7 +48,31 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Guard: Request payload size limit
+    // 1. Guard: Origin / CSRF Defense
+    if (!isOriginAllowed(req)) {
+      const res = NextResponse.json(
+        {
+          error: "Forbidden",
+          message: "Cross-origin request rejected.",
+        },
+        { status: 403 }
+      );
+      return applySecurityHeaders(res);
+    }
+
+    // 2. Guard: Content-Type Header Verification
+    if (!isJsonContentType(req)) {
+      const res = NextResponse.json(
+        {
+          error: "Unsupported Media Type",
+          message: "Request must specify Content-Type: application/json",
+        },
+        { status: 415 }
+      );
+      return applySecurityHeaders(res);
+    }
+
+    // 3. Guard: Request payload size limit
     if (!isRequestBodyWithinLimit(req)) {
       const res = NextResponse.json(
         {
@@ -56,7 +84,7 @@ export async function POST(req: NextRequest) {
       return applySecurityHeaders(res);
     }
 
-    // 2. Guard: Sliding-window rate limit
+    // 4. Guard: Sliding-window rate limit
     const clientIp = getClientIp(req);
     const rateCheck = globalRateLimiter.check(clientIp);
 
@@ -79,7 +107,7 @@ export async function POST(req: NextRequest) {
       return applySecurityHeaders(res);
     }
 
-    // 3. Parse JSON body safely
+    // 5. Parse JSON body safely
     let rawBody: unknown;
     try {
       rawBody = await req.json();
@@ -94,7 +122,7 @@ export async function POST(req: NextRequest) {
       return applySecurityHeaders(res);
     }
 
-    // 4. Validate input with strict Zod schema
+    // 6. Validate input with strict Zod schema
     const validationResult = EventPreferencesSchema.safeParse(rawBody);
     if (!validationResult.success) {
       const formattedErrors = validationResult.error.issues.map((issue) => ({
@@ -115,10 +143,10 @@ export async function POST(req: NextRequest) {
 
     const preferences = validationResult.data;
 
-    // 5. Generate plan via AI engine or fallback demo
+    // 7. Generate plan via AI engine or fallback demo
     const { plan, fallbackUsed, errorReason } = await generateEventPlan(preferences);
 
-    // 6. Return response with rate limit and security headers
+    // 8. Return response with rate limit and security headers
     const res = NextResponse.json(
       {
         success: true,
@@ -137,7 +165,7 @@ export async function POST(req: NextRequest) {
 
     return applySecurityHeaders(res);
   } catch (err: unknown) {
-    // 7. Safe error handling - never leak stack traces or env variables
+    // 9. Safe error handling - never leak stack traces or env variables
     const safeMessage =
       process.env.NODE_ENV === "development" && err instanceof Error
         ? err.message

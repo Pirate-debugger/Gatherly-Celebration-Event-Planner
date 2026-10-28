@@ -6,10 +6,14 @@ import {
   Phone,
   Mail,
   HelpCircle,
+  PlusCircle,
+  Trash2,
+  X,
 } from "lucide-react";
 import {
   VendorItem,
   VendorStatus,
+  BudgetCategory,
   CurrencyCode,
 } from "@/types/event";
 import { formatCurrency, CATEGORY_LABELS } from "@/lib/calculations/budget";
@@ -68,6 +72,19 @@ export function VendorHubSection({
   onUpdateVendors,
 }: VendorHubSectionProps) {
   const [checkedQuestions, setCheckedQuestions] = useState<Record<string, boolean>>({});
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // New Vendor Form State
+  const [newRole, setNewRole] = useState("");
+  const [newCategory, setNewCategory] = useState<BudgetCategory>("catering_beverages");
+  const [newContactName, setNewContactName] = useState("");
+  const [newContactEmail, setNewContactEmail] = useState("");
+  const [newContactPhone, setNewContactPhone] = useState("");
+  const [newEstimatedCost, setNewEstimatedCost] = useState("1500");
+  const [newDepositAmount, setNewDepositAmount] = useState("500");
+  const [newDepositDueDate, setNewDepositDueDate] = useState("");
+  const [newPaymentReminder, setNewPaymentReminder] = useState("");
+  const [newDescription, setNewDescription] = useState("");
 
   const handleStatusChange = (id: string, newStatus: VendorStatus) => {
     const isConfirmed =
@@ -88,6 +105,10 @@ export function VendorHubSection({
     onUpdateVendors(updated);
   };
 
+  const handleDeleteVendor = (id: string) => {
+    onUpdateVendors(vendors.filter((v) => v.id !== id));
+  };
+
   const toggleQuestion = (vendorId: string, qIdx: number) => {
     const key = `${vendorId}-${qIdx}`;
     setCheckedQuestions((prev) => ({
@@ -96,16 +117,67 @@ export function VendorHubSection({
     }));
   };
 
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRole.trim()) return;
+
+    const estCost = Math.max(0, parseFloat(newEstimatedCost) || 0);
+    const depAmt = newDepositAmount ? Math.max(0, parseFloat(newDepositAmount) || 0) : undefined;
+
+    const newVendor: VendorItem = {
+      id: `vendor-${Date.now()}`,
+      category: newCategory,
+      role: newRole.trim(),
+      description: newDescription.trim() || `Dedicated supplier for ${newRole.trim()}`,
+      requirements: ["Deliver signed agreement", "Fulfill celebration specification"],
+      estimatedCost: estCost,
+      confirmedCost: null,
+      status: "researching",
+      contactName: newContactName.trim() || undefined,
+      contactEmail: newContactEmail.trim() || undefined,
+      contactPhone: newContactPhone.trim() || undefined,
+      depositAmount: depAmt,
+      depositDueDate: newDepositDueDate.trim() || undefined,
+      paymentReminder: newPaymentReminder.trim() || undefined,
+      questionsToAsk: [
+        "What is your cancellation and weather contingency policy?",
+        "Are all staffing and setup fees included in this estimate?",
+      ],
+      alternativeOptions: [],
+      bookingConfirmed: false,
+    };
+
+    onUpdateVendors([...vendors, newVendor]);
+    setIsAddModalOpen(false);
+    setNewRole("");
+    setNewContactName("");
+    setNewContactEmail("");
+    setNewContactPhone("");
+    setNewDescription("");
+    setNewPaymentReminder("");
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-          <Users className="h-4 w-4 text-violet-400" />
-          <span>Vendor Command Hub & Procurement Checklist</span>
-        </h3>
-        <p className="text-xs text-slate-400 mt-0.5">
-          Track contract milestones, deposit reminders, interview questions, and backup suppliers.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+            <Users className="h-4 w-4 text-violet-400" />
+            <span>Vendor Command Hub & Procurement Checklist</span>
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Track contract milestones, deposit reminders, interview questions, and backup suppliers.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsAddModalOpen(true)}
+          className="inline-flex items-center space-x-1.5 rounded-lg bg-violet-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-violet-500 transition shadow-sm self-start sm:self-auto"
+        >
+          <PlusCircle className="h-3.5 w-3.5" />
+          <span>Add Custom Vendor</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -133,19 +205,33 @@ export function VendorHubSection({
                   )}
                 </div>
 
-                {/* Status Dropdown */}
-                <select
-                  value={vendor.status}
-                  onChange={(e) => handleStatusChange(vendor.id, e.target.value as VendorStatus)}
-                  className={`rounded-lg border px-2.5 py-1 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
-                >
-                  <option value="researching">Researching</option>
-                  <option value="contacted">Contacted</option>
-                  <option value="quoted">Quote Received</option>
-                  <option value="contract_signed">Contract Signed</option>
-                  <option value="deposit_paid">Deposit Paid</option>
-                  <option value="fully_paid">Fully Paid</option>
-                </select>
+                <div className="flex items-center space-x-2">
+                  {/* Status Dropdown */}
+                  <select
+                    value={vendor.status}
+                    onChange={(e) => handleStatusChange(vendor.id, e.target.value as VendorStatus)}
+                    aria-label={`Status for ${vendor.role}`}
+                    className={`rounded-lg border px-2.5 py-1 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
+                  >
+                    <option value="researching">Researching</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="quoted">Quote Received</option>
+                    <option value="contract_signed">Contract Signed</option>
+                    <option value="deposit_paid">Deposit Paid</option>
+                    <option value="fully_paid">Fully Paid</option>
+                  </select>
+
+                  {/* Delete Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteVendor(vendor.id)}
+                    title={`Delete ${vendor.role}`}
+                    aria-label={`Delete ${vendor.role}`}
+                    className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Description */}
@@ -260,6 +346,188 @@ export function VendorHubSection({
           );
         })}
       </div>
+
+      {/* Add Vendor Modal */}
+      {isAddModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div className="relative w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl text-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-white flex items-center space-x-2">
+                <Users className="h-4 w-4 text-violet-400" />
+                <span>Add Custom Vendor Partner</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddSubmit} className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block font-semibold text-slate-300 mb-1">
+                    Vendor Role / Specialty *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value)}
+                    placeholder="e.g. Master Patisserie & Cake"
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-white focus:border-violet-500"
+                  />
+                </div>
+
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block font-semibold text-slate-300 mb-1">
+                    Budget Category *
+                  </label>
+                  <select
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value as BudgetCategory)}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-white focus:border-violet-500"
+                  >
+                    {Object.entries(CATEGORY_LABELS).map(([catKey, label]) => (
+                      <option key={catKey} value={catKey}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block font-semibold text-slate-300 mb-1">
+                    Contact Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newContactName}
+                    onChange={(e) => setNewContactName(e.target.value)}
+                    placeholder="e.g. Alice Chen"
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-white focus:border-violet-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-300 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={newContactEmail}
+                    onChange={(e) => setNewContactEmail(e.target.value)}
+                    placeholder="orders@bakery.com"
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-white focus:border-violet-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-300 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={newContactPhone}
+                    onChange={(e) => setNewContactPhone(e.target.value)}
+                    placeholder="(555) 234-5678"
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-white focus:border-violet-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block font-semibold text-slate-300 mb-1">
+                    Estimated Cost ({currency}) *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="50"
+                    required
+                    value={newEstimatedCost}
+                    onChange={(e) => setNewEstimatedCost(e.target.value)}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-white focus:border-violet-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-300 mb-1">
+                    Deposit Amount ({currency})
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="50"
+                    value={newDepositAmount}
+                    onChange={(e) => setNewDepositAmount(e.target.value)}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-white focus:border-violet-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-300 mb-1">
+                    Deposit Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={newDepositDueDate}
+                    onChange={(e) => setNewDepositDueDate(e.target.value)}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-white focus:border-violet-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-300 mb-1">
+                  Payment Reminder / Terms Note
+                </label>
+                <input
+                  type="text"
+                  value={newPaymentReminder}
+                  onChange={(e) => setNewPaymentReminder(e.target.value)}
+                  placeholder="e.g. 50% deposit upon contract, balance 14 days prior"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-white focus:border-violet-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-300 mb-1">
+                  Scope & Service Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  placeholder="Describe scope, tasting notes, delivery logistics..."
+                  className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-white focus:border-violet-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="rounded-lg px-3 py-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-violet-600 px-4 py-1.5 font-semibold text-white hover:bg-violet-500 transition shadow-md shadow-violet-600/30"
+                >
+                  Save Vendor
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

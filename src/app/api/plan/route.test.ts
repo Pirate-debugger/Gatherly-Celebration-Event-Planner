@@ -48,7 +48,10 @@ describe("API Route: /api/plan", () => {
     it("generates and reconciles plan for valid input", async () => {
       const req = new NextRequest("http://localhost:3000/api/plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Host: "localhost:3000",
+        },
         body: JSON.stringify(validBody),
       });
 
@@ -62,10 +65,50 @@ describe("API Route: /api/plan", () => {
       expect(json.data.budgetSummary.totalAllocated).toBe(40000);
     });
 
+    it("returns 415 if Content-Type is missing or not application/json", async () => {
+      const req = new NextRequest("http://localhost:3000/api/plan", {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain",
+          Host: "localhost:3000",
+        },
+        body: JSON.stringify(validBody),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(415);
+      const json = await res.json();
+      expect(json.error).toBe("Unsupported Media Type");
+    });
+
+    it("returns 403 if request origin is hostile / unauthorized", () => {
+      const originalEnv = process.env.NODE_ENV;
+      // In production mode, mismatched foreign origins are rejected
+      (process.env as Record<string, string | undefined>).NODE_ENV = "production";
+
+      const req = new NextRequest("http://localhost:3000/api/plan", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://evil-attacker.example.com",
+          Host: "gatherly.app",
+        },
+        body: JSON.stringify(validBody),
+      });
+
+      return POST(req).then((res) => {
+        (process.env as Record<string, string | undefined>).NODE_ENV = originalEnv;
+        expect(res.status).toBe(403);
+      });
+    });
+
     it("returns 400 for invalid payload (e.g., negative guest count)", async () => {
       const req = new NextRequest("http://localhost:3000/api/plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Host: "localhost:3000",
+        },
         body: JSON.stringify({
           ...validBody,
           guestCount: -10,
@@ -83,7 +126,10 @@ describe("API Route: /api/plan", () => {
     it("returns 400 for malformed JSON", async () => {
       const req = new NextRequest("http://localhost:3000/api/plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Host: "localhost:3000",
+        },
         body: "NOT_VALID_JSON{",
       });
 
@@ -99,6 +145,7 @@ describe("API Route: /api/plan", () => {
         headers: {
           "Content-Type": "application/json",
           "Content-Length": "100000", // 100 KB > 32 KB limit
+          Host: "localhost:3000",
         },
         body: JSON.stringify(validBody),
       });

@@ -2,7 +2,7 @@
  * Gatherly - Security Headers and Request Defense Utilities
  *
  * Provides standard OWASP-recommended security headers, request body size limits,
- * and client IP resolution.
+ * Content-Type verification, origin checking, and client IP resolution.
  */
 
 import { NextResponse } from "next/server";
@@ -57,4 +57,45 @@ export function isRequestBodyWithinLimit(req: Request): boolean {
   const length = parseInt(contentLength, 10);
   if (isNaN(length)) return false;
   return length <= MAX_REQUEST_BODY_BYTES;
+}
+
+/**
+ * Validates that incoming POST requests specify Content-Type: application/json.
+ */
+export function isJsonContentType(req: Request): boolean {
+  const contentType = req.headers.get("content-type");
+  if (!contentType) return false;
+  return contentType.toLowerCase().includes("application/json");
+}
+
+/**
+ * Checks if the request origin matches the request host or is an allowed development origin.
+ */
+export function isOriginAllowed(req: Request): boolean {
+  const origin = req.headers.get("origin");
+  if (!origin) {
+    // Direct or same-origin programmatic requests without Origin header are permitted
+    return true;
+  }
+
+  const host = req.headers.get("host");
+  if (!host) return true;
+
+  try {
+    const originUrl = new URL(origin);
+    // Allow matching host
+    if (originUrl.host === host) return true;
+
+    // Allow localhost/127.0.0.1 in non-production environments
+    if (
+      process.env.NODE_ENV !== "production" &&
+      (originUrl.hostname === "localhost" || originUrl.hostname === "127.0.0.1")
+    ) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
 }

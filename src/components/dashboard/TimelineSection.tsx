@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   CheckCircle2,
@@ -8,6 +8,8 @@ import {
   AlertCircle,
   PlusCircle,
   Search,
+  Trash2,
+  Link2,
 } from "lucide-react";
 import {
   TimelineTask,
@@ -37,6 +39,19 @@ export function TimelineSection({
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  // Client-side live date detection (preserves SSR stability with zero hydration error)
+  const [todayStr, setTodayStr] = useState<string>("2027-01-01");
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      setTodayStr(`${y}-${m}-${d}`);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   // New Task Modal Form State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -46,7 +61,7 @@ export function TimelineSection({
   const [newPriority, setNewPriority] = useState<PriorityLevel>("medium");
   const [newCategory, setNewCategory] = useState("Operations");
 
-  const progress = calculateTimelineProgress(tasks);
+  const progress = calculateTimelineProgress(tasks, todayStr);
 
   // Toggle task status: todo -> in_progress -> completed -> todo
   const handleCycleStatus = (id: string) => {
@@ -60,12 +75,16 @@ export function TimelineSection({
         return {
           ...t,
           status: nextStatus,
-          isOverdue: isTaskOverdue(t.targetDate, nextStatus),
+          isOverdue: isTaskOverdue(t.targetDate, nextStatus, todayStr),
         };
       }
       return t;
     });
     onUpdateTasks(updated);
+  };
+
+  const handleDeleteTask = (id: string) => {
+    onUpdateTasks(tasks.filter((t) => t.id !== id));
   };
 
   // Add custom task
@@ -222,7 +241,7 @@ export function TimelineSection({
           filteredTasks.map((task) => {
             const isCompleted = task.status === "completed";
             const isInProgress = task.status === "in_progress";
-            const overdue = isTaskOverdue(task.targetDate, task.status);
+            const overdue = isTaskOverdue(task.targetDate, task.status, todayStr);
 
             return (
               <div
@@ -302,11 +321,29 @@ export function TimelineSection({
                         {task.description}
                       </p>
                     )}
+
+                    {/* Task Dependencies Display */}
+                    {task.dependencies && task.dependencies.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400 pt-1">
+                        <span className="flex items-center space-x-1 font-semibold text-slate-500">
+                          <Link2 className="h-3 w-3 text-indigo-400" />
+                          <span>Prerequisites:</span>
+                        </span>
+                        {task.dependencies.map((dep, dIdx) => (
+                          <span
+                            key={dIdx}
+                            className="rounded bg-slate-800/80 px-1.5 py-0.5 border border-slate-700/60 text-slate-300 text-[10px]"
+                          >
+                            {dep}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Right: Date & Status Action */}
-                <div className="flex items-center space-x-3 self-end sm:self-center shrink-0">
+                <div className="flex items-center space-x-2.5 self-end sm:self-center shrink-0">
                   <div className="text-right">
                     <span className="text-slate-400 text-[11px] block">Target Date</span>
                     <span className="font-semibold text-slate-200">{task.targetDate}</span>
@@ -328,6 +365,16 @@ export function TimelineSection({
                       : isInProgress
                       ? "In Progress..."
                       : "Mark Started"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteTask(task.id)}
+                    title={`Delete task ${task.title}`}
+                    aria-label={`Delete task ${task.title}`}
+                    className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition"
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>

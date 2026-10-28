@@ -7,6 +7,7 @@ import {
   UserCheck,
   PlusCircle,
   FileText,
+  Trash2,
 } from "lucide-react";
 import { ItineraryItem } from "@/types/event";
 
@@ -26,6 +27,10 @@ export function ItinerarySection({
   const [newLocation, setNewLocation] = useState("Main Hall");
   const [newResponsible, setNewResponsible] = useState("Event Coordinator");
   const [newNotes, setNewNotes] = useState("");
+
+  const handleDeleteItem = (id: string) => {
+    onUpdateItinerary(itinerary.filter((item) => item.id !== id));
+  };
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +102,15 @@ export function ItinerarySection({
                     <UserCheck className="h-3 w-3 text-emerald-400" />
                     <span>{item.responsible}</span>
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteItem(item.id)}
+                    title="Remove time slot"
+                    aria-label={`Remove ${item.activity} time slot`}
+                    className="text-slate-500 hover:text-rose-400 transition p-1 rounded hover:bg-slate-800"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
 

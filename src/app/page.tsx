@@ -29,10 +29,17 @@ import {
 } from "@/lib/demo/presets";
 import { calculateBudgetSummary } from "@/lib/calculations/budget";
 import { calculateTimelineProgress } from "@/lib/calculations/timeline";
+import { generateEventIcs, downloadIcsFile } from "@/lib/export/calendar";
+import {
+  loadPlanFromStorage,
+  savePlanToStorage,
+  clearStoredPlan,
+} from "@/lib/storage/persistence";
 
 import { Header } from "@/components/layout/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { EventWizardModal } from "@/components/wizard/EventWizardModal";
+import { SettingsModal } from "@/components/modals/SettingsModal";
 import { ExecutiveOverviewCard } from "@/components/dashboard/ExecutiveOverviewCard";
 import { BudgetSection } from "@/components/dashboard/BudgetSection";
 import { TimelineSection } from "@/components/dashboard/TimelineSection";
@@ -58,12 +65,31 @@ export default function HomePage() {
   );
   const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAiAvailable, setIsAiAvailable] = useState(false);
   const [notification, setNotification] = useState<{
     type: "success" | "error" | "info";
     text: string;
   } | null>(null);
+
+  // Restore saved plan from LocalStorage on client mount if available
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const saved = loadPlanFromStorage();
+      if (saved) {
+        setActivePlan(saved);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Synchronize changes to LocalStorage
+  useEffect(() => {
+    if (activePlan) {
+      savePlanToStorage(activePlan);
+    }
+  }, [activePlan]);
 
   // Check health and whether live Gemini API key is present
   useEffect(() => {
@@ -201,6 +227,26 @@ export default function HomePage() {
     showNotification("Plan exported to JSON file.");
   };
 
+  // Export iCalendar (.ics)
+  const handleExportIcs = () => {
+    if (!activePlan) return;
+    const icsContent = generateEventIcs(activePlan);
+    const cleanTitle = activePlan.userPreferences.title
+      .replace(/[^a-zA-Z0-9]/g, "_")
+      .toLowerCase();
+    downloadIcsFile(`gatherly_${cleanTitle}.ics`, icsContent);
+    showNotification("Calendar (.ics) file exported successfully!");
+  };
+
+  // Reset to default blueprint
+  const handleResetToDefaults = () => {
+    clearStoredPlan();
+    const defaultPlan = generateDemoPlan(SAMPLE_WEDDING_PRESET);
+    setActivePlan(defaultPlan);
+    setActiveTab("overview");
+    showNotification("Reset blueprint to Sonoma Wedding default.");
+  };
+
   // Import JSON
   const handleImportJson = (imported: EventPlan) => {
     setActivePlan(imported);
@@ -228,8 +274,10 @@ export default function HomePage() {
           onOpenWizard={() => setIsWizardOpen(true)}
           onLoadPreset={handleLoadPreset}
           onExportJson={handleExportJson}
+          onExportIcs={handleExportIcs}
           onImportJson={handleImportJson}
           onPrint={handlePrint}
+          onOpenSettings={() => setIsSettingsOpen(true)}
           isAiAvailable={isAiAvailable}
         />
 
@@ -434,6 +482,14 @@ export default function HomePage() {
           onClose={() => setIsWizardOpen(false)}
           onSubmit={handleWizardSubmit}
           isSubmitting={isSubmitting}
+        />
+
+        {/* Settings, Security & Privacy Modal */}
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          onResetToDefaults={handleResetToDefaults}
+          isAiAvailable={isAiAvailable}
         />
       </div>
     </>

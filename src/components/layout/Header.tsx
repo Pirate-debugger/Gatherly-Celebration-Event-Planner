@@ -4,11 +4,13 @@ import React, { useRef } from "react";
 import {
   Sparkles,
   Download,
+  Calendar,
   Upload,
   Printer,
   PlusCircle,
   Cpu,
   CheckCircle2,
+  Settings,
 } from "lucide-react";
 import { EventPlan } from "@/types/event";
 
@@ -17,8 +19,10 @@ interface HeaderProps {
   onOpenWizard: () => void;
   onLoadPreset: (presetKey: "wedding" | "birthday" | "community") => void;
   onExportJson: () => void;
+  onExportIcs?: () => void;
   onImportJson: (imported: EventPlan) => void;
   onPrint: () => void;
+  onOpenSettings?: () => void;
   isAiAvailable?: boolean;
 }
 
@@ -27,8 +31,10 @@ export function Header({
   onOpenWizard,
   onLoadPreset,
   onExportJson,
+  onExportIcs,
   onImportJson,
   onPrint,
+  onOpenSettings,
   isAiAvailable = false,
 }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -110,7 +116,12 @@ export function Header({
         {/* Right Actions */}
         <div className="flex items-center space-x-2">
           {/* Mode Indicator */}
-          <div className="hidden md:flex items-center space-x-1 rounded-full border border-slate-800 bg-slate-900/80 px-2.5 py-1 text-xs text-slate-300">
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            title="View AI Engine & Privacy Details"
+            className="hidden md:flex items-center space-x-1 rounded-full border border-slate-800 bg-slate-900/80 px-2.5 py-1 text-xs text-slate-300 hover:bg-slate-800 transition"
+          >
             {isAiAvailable ? (
               <>
                 <Cpu className="h-3.5 w-3.5 text-emerald-400" />
@@ -122,7 +133,7 @@ export function Header({
                 <span className="text-slate-300">Curated Engine</span>
               </>
             )}
-          </div>
+          </button>
 
           {currentPlan && (
             <>
@@ -132,11 +143,25 @@ export function Header({
                 onClick={onExportJson}
                 title="Export plan to JSON"
                 aria-label="Export plan to JSON"
-                className="flex items-center space-x-1.5 rounded-lg border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition"
+                className="flex items-center space-x-1.5 rounded-lg border border-slate-700/80 bg-slate-800/80 px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition"
               >
                 <Download className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Export</span>
+                <span className="hidden sm:inline">JSON</span>
               </button>
+
+              {/* Export Calendar (.ics) */}
+              {onExportIcs && (
+                <button
+                  type="button"
+                  onClick={onExportIcs}
+                  title="Export to iCalendar (.ics)"
+                  aria-label="Export to iCalendar (.ics)"
+                  className="flex items-center space-x-1.5 rounded-lg border border-slate-700/80 bg-slate-800/80 px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition"
+                >
+                  <Calendar className="h-3.5 w-3.5 text-indigo-400" />
+                  <span className="hidden sm:inline">iCal</span>
+                </button>
+              )}
 
               {/* Print */}
               <button
@@ -144,7 +169,7 @@ export function Header({
                 onClick={onPrint}
                 title="Print or save as PDF"
                 aria-label="Print or save as PDF"
-                className="flex items-center space-x-1.5 rounded-lg border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition"
+                className="flex items-center space-x-1.5 rounded-lg border border-slate-700/80 bg-slate-800/80 px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition"
               >
                 <Printer className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Print</span>
@@ -166,11 +191,24 @@ export function Header({
             onClick={() => fileInputRef.current?.click()}
             title="Import an existing plan"
             aria-label="Import an existing plan"
-            className="flex items-center space-x-1.5 rounded-lg border border-slate-700/80 bg-slate-800/80 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition"
+            className="flex items-center space-x-1.5 rounded-lg border border-slate-700/80 bg-slate-800/80 px-2.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition"
           >
             <Upload className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Import</span>
           </button>
+
+          {/* Settings & Privacy Button */}
+          {onOpenSettings && (
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              title="Settings & Privacy Information"
+              aria-label="Settings & Privacy Information"
+              className="flex items-center justify-center rounded-lg border border-slate-700/80 bg-slate-800/80 p-1.5 text-slate-200 hover:bg-slate-700 hover:text-white transition"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+          )}
 
           {/* New Event Wizard Button */}
           <button
